@@ -20,7 +20,7 @@ func getConfigFilepath() (string, error) {
 		return "", fmt.Errorf("error getting home location: %w", err)
 	}
 
-	path := filepath.Join(home, "/workspace/github/gator/", configFileName)
+	path := filepath.Join(home, configFileName)
 	return path, nil
 }
 

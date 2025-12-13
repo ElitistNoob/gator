@@ -4,9 +4,9 @@ import (
 	"fmt"
 )
 
-func handlerLogin(s *State, c command) error {
+func handlerLogin(s *state, c command) error {
 	if len(c.args) < 1 {
-		return fmt.Errorf("command required at least one argument")
+		return fmt.Errorf("user name is required")
 	}
 
 	if err := s.cfg.SetUser(c.args[0]); err != nil {

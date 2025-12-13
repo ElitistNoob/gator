@@ -1,33 +1,8 @@
 package main
 
 import (
-	"reflect"
-
-	"github.com/ElitistNoob/gator/internal/config"
+	"fmt"
 )
-
-func hasMethod(s *State, cmd string) (reflect.Method, bool) {
-	t := reflect.TypeOf(*s)
-	return t.MethodByName(cmd)
-}
-
-func (c commands) Run(s *State, cmd command) error {
-	v := reflect.ValueOf(c)
-	m, ok := hasMethod(s, cmd.name)
-	if ok {
-		m.Func.Call([]reflect.Value{v})
-	}
-
-	return nil
-}
-
-func (c command) Register(name string, f func(*State, command) error) {
-	return nil
-}
-
-type State struct {
-	cfg *config.Config
-}
 
 type command struct {
 	name string
@@ -35,5 +10,24 @@ type command struct {
 }
 
 type commands struct {
-	cmds map[string]func(*State, command) error
+	cmds map[string]func(*state, command) error
+}
+
+func NewCommand() *commands {
+	return &commands{
+		make(map[string]func(*state, command) error),
+	}
+}
+
+func (c commands) register(name string, f func(*state, command) error) {
+	c.cmds[name] = f
+}
+
+func (c commands) Run(s *state, cmd command) error {
+	handler, ok := c.cmds[cmd.name]
+	if !ok {
+		return fmt.Errorf("unknown command: %s", cmd.name)
+	}
+
+	return handler(s, cmd)
 }

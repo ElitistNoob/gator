@@ -2,9 +2,14 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/ElitistNoob/gator/internal/config"
 )
+
+type state struct {
+	cfg *config.Config
+}
 
 func main() {
 	cfg, err := config.Read()
@@ -12,11 +17,21 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	state := &State{
+	programState := &state{
 		cfg: cfg,
 	}
 
-	cmd := &commands{
-		cmds: make(map[string]func(*State, command) error),
+	c := NewCommand()
+	c.register("login", handlerLogin)
+
+	args := os.Args
+	if len(args) < 2 {
+		log.Fatalln("not enough arguments were provided")
+		os.Exit(1)
+	}
+
+	if err := c.Run(programState, command{name: args[1], args: args[2:]}); err != nil {
+		log.Fatalf("error: %v\n", err)
+		os.Exit(1)
 	}
 }
