@@ -23,7 +23,6 @@ func main() {
 	db, err := sql.Open("postgres", cfg.Db_url)
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
-		os.Exit(1)
 	}
 
 	dbQueries := database.New(db)
@@ -36,15 +35,14 @@ func main() {
 	c := NewCommand()
 	c.register("login", handlerLogin)
 	c.register("register", handlerRegister)
+	c.register("reset", handlerReset)
 
 	args := os.Args
 	if len(args) < 2 {
 		log.Fatalln("not enough arguments were provided")
-		os.Exit(1)
 	}
 
 	if err := c.Run(programState, command{name: args[1], args: args[2:]}); err != nil {
 		log.Fatalf("error: %v\n", err)
-		os.Exit(1)
 	}
 }

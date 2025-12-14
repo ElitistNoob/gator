@@ -11,3 +11,6 @@ WHERE name = $1;
 SELECT EXISTS (
   SELECT 1 from users WHERE name = $1
 );
+
+-- name: DeleteUsers :exec
+TRUNCATE users RESTART IDENTITY CASCADE;
