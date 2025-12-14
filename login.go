@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"os"
 )
 
 func handlerLogin(s *state, c command) error {
@@ -9,10 +11,19 @@ func handlerLogin(s *state, c command) error {
 		return fmt.Errorf("user name is required")
 	}
 
-	if err := s.cfg.SetUser(c.args[0]); err != nil {
+	ctx := context.Background()
+	userName := c.args[0]
+
+	user, err := s.db.GetUser(ctx, userName)
+	if err != nil {
+		return fmt.Errorf("user does not exist: %w", err)
+		os.Exit(1)
+	}
+
+	if err := s.cfg.SetUser(user.Name); err != nil {
 		return err
 	}
 
-	fmt.Printf("User %s has been successfully logged in", c.args[0])
+	fmt.Printf("User %s has been successfully logged in", user.Name)
 	return nil
 }
