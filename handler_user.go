@@ -34,11 +34,12 @@ func handlerRegister(s *state, c command) error {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Printf("user: %s, was successfully created\n", user.Name)
+	fmt.Printf("user was successfully created:\n")
 
-	fmt.Printf("ID: %v\n", user.ID)
-	fmt.Printf("Name: %s\n", user.Name)
-	fmt.Printf("Created_at: %v\n", user.CreatedAt)
+	fmt.Printf("> ID:           %v\n", user.ID)
+	fmt.Printf("> Created_at:   %v\n", user.CreatedAt)
+	fmt.Printf("> Updated_at:   %v\n", user.CreatedAt)
+	fmt.Printf("> Name:         %s\n", user.Name)
 
 	return nil
 }
