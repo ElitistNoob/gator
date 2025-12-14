@@ -36,6 +36,7 @@ func main() {
 	c.register("login", handlerLogin)
 	c.register("register", handlerRegister)
 	c.register("reset", handlerReset)
+	c.register("users", handlerGetUsers)
 
 	args := os.Args
 	if len(args) < 2 {

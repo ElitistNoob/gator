@@ -14,3 +14,6 @@ SELECT EXISTS (
 
 -- name: DeleteUsers :exec
 TRUNCATE users RESTART IDENTITY CASCADE;
+
+-- name: GetUsers :many
+SELECT * FROM users;

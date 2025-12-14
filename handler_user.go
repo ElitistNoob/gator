@@ -60,3 +60,27 @@ func handlerLogin(s *state, c command) error {
 	fmt.Printf("User %s has been successfully logged in", user.Name)
 	return nil
 }
+
+func handlerGetUsers(s *state, c command) error {
+	ctx := context.Background()
+	users, err := s.db.GetUsers(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting users: %w", err)
+	}
+
+	if len(users) == 0 {
+		return fmt.Errorf("users table is empty")
+	}
+
+	currentUser := s.cfg.Current_user_name
+	for _, user := range users {
+		string := fmt.Sprintf("* %s", user.Name)
+		if user.Name == currentUser {
+			string += " (current)"
+		}
+
+		fmt.Println(string)
+	}
+
+	return nil
+}
