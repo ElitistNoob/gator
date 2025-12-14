@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	db "github.com/ElitistNoob/gator/internal/database"
@@ -35,8 +34,12 @@ func handlerRegister(s *state, c command) error {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Printf("user: %s, was successfully created", s.cfg.Current_user_name)
-	log.Println(user.Name)
+	fmt.Printf("user: %s, was successfully created\n", user.Name)
+
+	fmt.Printf("ID: %v\n", user.ID)
+	fmt.Printf("Name: %s\n", user.Name)
+	fmt.Printf("Created_at: %v\n", user.CreatedAt)
+
 	return nil
 }
 
