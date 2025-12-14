@@ -7,6 +7,10 @@ RETURNING *;
 SELECT * FROM users
 WHERE name = $1;
 
+-- name: GetUserById :one
+SELECT name FROM users
+WHERE id = $1;
+
 -- name: UserExist :one
 SELECT EXISTS (
   SELECT 1 from users WHERE name = $1

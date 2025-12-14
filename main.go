@@ -33,12 +33,17 @@ func main() {
 	}
 
 	c := NewCommand()
+
+	// Users commands
 	c.register("login", handlerLogin)
 	c.register("register", handlerRegister)
 	c.register("reset", handlerReset)
 	c.register("users", handlerGetUsers)
+
+	// Feeds commands
 	c.register("agg", agg)
 	c.register("addfeed", handlerAddFeed)
+	c.register("feeds", handlerGetFeeds)
 
 	args := os.Args
 	if len(args) < 2 {

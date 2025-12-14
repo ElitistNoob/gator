@@ -44,3 +44,30 @@ func handlerAddFeed(s *state, c command) error {
 
 	return nil
 }
+
+func handlerGetFeeds(s *state, c command) error {
+	feeds, err := s.db.GetFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("couldn't get feeds: %w", err)
+	}
+
+	if len(feeds) < 1 {
+		return fmt.Errorf("feeds table is empty")
+	}
+
+	for _, feed := range feeds {
+		user, err := s.db.GetUserById(context.Background(), feed.UserID)
+		if err != nil {
+			return fmt.Errorf("error getting referenced user: %w", err)
+		}
+
+		fmt.Println(" ")
+		fmt.Printf("> Name:         %s\n", feed.Name)
+		fmt.Printf("> Url:          %v\n", feed.Url)
+		fmt.Printf("> Username:     %v\n", user)
+		fmt.Println(" ")
+		fmt.Println("====================================")
+	}
+
+	return nil
+}
