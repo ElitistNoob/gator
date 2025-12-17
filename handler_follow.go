@@ -39,7 +39,7 @@ func handlerFollow(s *state, c command) error {
 		return err
 	}
 
-	fmt.Printf("feed_follow was successfully created:\n")
+	fmt.Printf("feed followed successfully:\n")
 
 	fmt.Printf("> feed_name:   %v\n", d.FeedName)
 	fmt.Printf("> user_name:   %v\n", d.UserName)
@@ -62,7 +62,6 @@ func handlerFollowing(s *state, c command) error {
 
 	fmt.Printf("following feed:\n")
 	for _, feed := range feeds {
-
 		fmt.Printf("> ID:   %v\n", feed.ID)
 		fmt.Printf("> CreateAt:   %v\n", feed.CreatedAt)
 		fmt.Printf("> UpdatedAt:   %v\n", feed.UpdatedAt)
