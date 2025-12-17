@@ -5,7 +5,7 @@ CREATE TABLE feed_follows(
   updated_at TIMESTAMP NOT NULL,
   user_id UUID NOT NULL REFERENCES users(id),
   feed_id UUID NOT NULL REFERENCES feeds(id),
-  CONSTRAINT unique_users_feeds UNIQUE(users_id, feeds_id)
+  CONSTRAINT unique_users_feeds UNIQUE(user_id, feed_id)
 );
 
 -- +goose Down
