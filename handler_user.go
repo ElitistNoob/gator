@@ -27,11 +27,11 @@ func handlerRegister(s *state, c command) error {
 
 	user, err := s.db.CreateUser(ctx, args)
 	if err != nil {
-		return fmt.Errorf("failed to create user: %w", err)
+		return err
 	}
 
 	if err := s.cfg.SetUser(user.Name); err != nil {
-		return fmt.Errorf("couldn't set current user: %w", err)
+		return err
 	}
 
 	fmt.Printf("user was successfully created:\n")
@@ -54,7 +54,7 @@ func handlerLogin(s *state, c command) error {
 
 	user, err := s.db.GetUser(ctx, userName)
 	if err != nil {
-		return fmt.Errorf("user does not exist: %w", err)
+		return err
 	}
 
 	if err := s.cfg.SetUser(user.Name); err != nil {

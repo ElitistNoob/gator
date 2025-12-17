@@ -12,7 +12,7 @@ import (
 func handlerAddFeed(s *state, c command) error {
 	currentUser, err := s.db.GetUser(context.Background(), s.cfg.Current_user_name)
 	if err != nil {
-		return fmt.Errorf("failed getting current user: %v\nerr: %w", s.cfg.Current_user_name, err)
+		return err
 	}
 
 	if len(c.args) < 2 {
@@ -30,7 +30,7 @@ func handlerAddFeed(s *state, c command) error {
 	}
 	feed, err := s.db.CreateFeed(context.Background(), args)
 	if err != nil {
-		return fmt.Errorf("failed creating feed: %w", err)
+		return err
 	}
 
 	fmt.Printf("feed was successfully created:\n")
@@ -48,7 +48,7 @@ func handlerAddFeed(s *state, c command) error {
 func handlerGetFeeds(s *state, c command) error {
 	feeds, err := s.db.GetFeeds(context.Background())
 	if err != nil {
-		return fmt.Errorf("couldn't get feeds: %w", err)
+		return err
 	}
 
 	if len(feeds) < 1 {
@@ -58,7 +58,7 @@ func handlerGetFeeds(s *state, c command) error {
 	for _, feed := range feeds {
 		user, err := s.db.GetUserById(context.Background(), feed.UserID)
 		if err != nil {
-			return fmt.Errorf("error getting referenced user: %w", err)
+			return err
 		}
 
 		fmt.Println(" ")
