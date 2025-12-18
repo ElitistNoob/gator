@@ -61,3 +61,27 @@ func handlerFollowing(s *state, c command, user db.User) error {
 
 	return nil
 }
+
+func handlerUnfollow(s *state, c command, user db.User) error {
+	if len(c.args) != 1 {
+		return fmt.Errorf("expected: %s <feed_url>\ngot: %s <null>", c.name, c.name)
+	}
+
+	ctx := context.Background()
+	feed, err := s.db.GetFeedByUrl(ctx, c.args[0])
+	if err != nil {
+		return fmt.Errorf("couldn't get feed:\n err: %w", err)
+	}
+
+	args := db.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}
+
+	if err := s.db.DeleteFeedFollow(context.Background(), args); err != nil {
+		return fmt.Errorf("couldn't delete follow record: %w", err)
+	}
+
+	fmt.Printf("%s unfollowed successfully", feed.Name)
+	return nil
+}
