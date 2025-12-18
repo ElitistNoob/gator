@@ -9,12 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, c command) error {
-	currentUser, err := s.db.GetUser(context.Background(), s.cfg.Current_user_name)
-	if err != nil {
-		return err
-	}
-
+func handlerAddFeed(s *state, c command, user db.User) error {
 	if len(c.args) != 2 {
 		return fmt.Errorf("expects arguments: <name> <url>\nGot: %v", c.args)
 	}
@@ -27,7 +22,7 @@ func handlerAddFeed(s *state, c command) error {
 		UpdatedAt: time.Now().UTC(),
 		Name:      name,
 		Url:       url,
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 	}
 	feed, err := s.db.CreateFeed(ctx, args)
 	if err != nil {
@@ -41,7 +36,7 @@ func handlerAddFeed(s *state, c command) error {
 		ID:        uuid.New(),
 		CreatedAt: now,
 		UpdatedAt: now,
-		UserID:    currentUser.ID,
+		UserID:    user.ID,
 		FeedID:    feed.ID,
 	}
 	feedFollow, err := s.db.CreateFeedFollow(ctx, createFeedFollowArgs)

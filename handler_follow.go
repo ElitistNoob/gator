@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, c command) error {
+func handlerFollow(s *state, c command, user db.User) error {
 	if len(c.args) < 1 {
 		return errors.New("no argument passed\nexpected: <url>")
 	}
@@ -19,11 +19,6 @@ func handlerFollow(s *state, c command) error {
 	feed, err := s.db.GetFeedByUrl(ctx, url)
 	if err != nil {
 		return fmt.Errorf("couldn't get feed with url: %v\nerr: %w", url, err)
-	}
-
-	user, err := s.db.GetUser(ctx, s.cfg.Current_user_name)
-	if err != nil {
-		return err
 	}
 
 	now := time.Now().UTC()
@@ -47,13 +42,8 @@ func handlerFollow(s *state, c command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, c command) error {
+func handlerFollowing(s *state, c command, user db.User) error {
 	ctx := context.Background()
-
-	user, err := s.db.GetUser(ctx, s.cfg.Current_user_name)
-	if err != nil {
-		return err
-	}
 
 	feeds, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {

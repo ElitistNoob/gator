@@ -42,10 +42,10 @@ func main() {
 
 	// Feeds commands
 	c.register("agg", agg)
-	c.register("addfeed", handlerAddFeed)
+	c.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 	c.register("feeds", handlerGetFeeds)
-	c.register("follow", handlerFollow)
-	c.register("following", handlerFollowing)
+	c.register("follow", middlewareLoggedIn(handlerFollow))
+	c.register("following", middlewareLoggedIn(handlerFollowing))
 
 	args := os.Args
 	if len(args) < 2 {
