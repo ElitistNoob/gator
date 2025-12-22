@@ -24,7 +24,7 @@ func agg(s *state, c command) error {
 	ticker := time.NewTicker(timeInterval)
 	defer ticker.Stop()
 	for ; ; <-ticker.C {
-		if err := scrapeFeeds(s, ctx); err != nil {
+		if err := scrapeFeeds(ctx, s); err != nil {
 			log.Printf("scrape error: %v", err)
 		}
 	}
