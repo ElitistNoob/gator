@@ -10,6 +10,10 @@ SELECT * FROM feeds;
 SELECT * FROM feeds
 WHERE url = $1;
 
+-- name: GetFeedNameByID :one
+SELECT name FROM feeds
+WHERE id = $1;
+
 -- name: MarkFeedFetched :exec
 UPDATE feeds
 SET last_fetched_at=NOW(), updated_at=NOW()

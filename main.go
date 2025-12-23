@@ -48,6 +48,9 @@ func main() {
 	c.register("following", middlewareLoggedIn(handlerFollowing))
 	c.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 
+	// Posts commands
+	c.register("browse", middlewareLoggedIn(handlerBrowse))
+
 	args := os.Args
 	if len(args) < 2 {
 		log.Fatalln("not enough arguments were provided")

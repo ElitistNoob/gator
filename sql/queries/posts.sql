@@ -5,11 +5,12 @@ RETURNING *;
 
 -- name: GetPostsForUser :many
 WITH users_feed AS (
-  SELECT * FROM feed_follows
+  SELECT feed_id FROM feed_follows
   WHERE feed_follows.user_id = $1
 )
 
-SELECT * FROM posts
-INNER JOIN users_feed ON posts.feed_id = users_feed.user_id
+SELECT posts.*, f.name AS feed_name FROM posts
+JOIN users_feed uf ON posts.feed_id = uf.feed_id
+JOIN feeds f ON posts.feed_id = f.id
 ORDER BY posts.created_at DESC
 LIMIT $2;

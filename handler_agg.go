@@ -4,7 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
+
+	db "github.com/ElitistNoob/gator/internal/database"
+	"github.com/ElitistNoob/gator/internal/dbutils"
+	"github.com/ElitistNoob/gator/internal/timeutils"
+	"github.com/google/uuid"
 )
 
 func agg(s *state, c command) error {
@@ -45,19 +51,34 @@ func scrapeFeeds(ctx context.Context, s *state) error {
 		return fmt.Errorf("failed to mark feed as fetched: %w", err)
 	}
 
-	var feedTitle string
-	for i, item := range rssFeed.Channel.Item {
-		if item.Title == "" {
-			continue
+	fmt.Printf("length: %d\n", len(rssFeed.Channel.Item))
+	for _, item := range rssFeed.Channel.Item {
+		pubDate, err := timeutils.ParseTime(item.PubDate)
+		if err != nil {
+			return err
 		}
 
-		if rssFeed.Channel.Title != feedTitle {
-			feedTitle = rssFeed.Channel.Title
-			fmt.Println()
-			fmt.Printf("Feed: %s\n", feedTitle)
+		params := db.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: dbutils.ToNullString(item.Description),
+			PublishedAt: pubDate,
+			FeedID:      nextFeed.ID,
 		}
 
-		fmt.Printf("> Blog %d: %s\n", i+1, item.Title)
+		post, err := s.db.CreatePost(ctx, params)
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			} else {
+				return fmt.Errorf("couldn't create post: %w", err)
+			}
+		}
+
+		fmt.Printf("%s, created Succesfully!\n", post.Title)
 	}
 
 	return nil
