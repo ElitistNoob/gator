@@ -16,7 +16,7 @@ func ParseTime(s string) (time.Time, error) {
 
 	for _, layout := range layouts {
 		t, err := time.Parse(layout, s)
-		if err != nil {
+		if err == nil {
 			return t, nil
 		}
 	}
