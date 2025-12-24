@@ -12,6 +12,7 @@ func ParseTime(s string) (time.Time, error) {
 		time.DateOnly,
 		time.TimeOnly,
 		time.DateTime,
+		"2006-01-02",
 	}
 
 	for _, layout := range layouts {
