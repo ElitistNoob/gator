@@ -13,6 +13,6 @@ SELECT posts.*, f.name AS feed_name FROM posts
 JOIN users_feed uf ON posts.feed_id = uf.feed_id
 JOIN feeds f ON posts.feed_id = f.id
 ORDER BY 
-CASE WHEN $2 = 'asc' THEN posts.created_at END ASC,
-CASE WHEN $2 = 'desc' THEN posts.created_at END DESC
+CASE WHEN $2 = 'asc' THEN posts.published_at END ASC,
+CASE WHEN $2 = 'desc' THEN posts.published_at END DESC
 LIMIT $3;
