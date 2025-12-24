@@ -58,7 +58,6 @@ func scrapeFeeds(ctx context.Context, s *state) error {
 			return err
 		}
 
-		fmt.Println(item.PubDate)
 		params := db.CreatePostParams{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now().UTC(),
