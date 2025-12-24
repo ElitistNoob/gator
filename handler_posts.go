@@ -2,20 +2,20 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
-	"strconv"
 
 	db "github.com/ElitistNoob/gator/internal/database"
 )
 
 func handlerBrowse(s *state, c command, user db.User) error {
-	limit := 2
-	if len(c.args) == 1 {
-		arg, err := strconv.Atoi(c.args[0])
-		if err != nil {
-			return fmt.Errorf("error converting argument to int: %w", err)
-		}
-		limit = arg
+	limit, order := 2, "desc"
+
+	f := flag.NewFlagSet("browse", flag.ExitOnError)
+	f.IntVar(&limit, "limit", 2, "number of post to show")
+	f.StringVar(&order, "order", "desc", "order of post to show by created at")
+	if err := f.Parse(c.args); err != nil {
+		return err
 	}
 
 	if limit <= 0 {
@@ -24,8 +24,9 @@ func handlerBrowse(s *state, c command, user db.User) error {
 
 	posts, err := s.db.GetPostsForUser(context.Background(),
 		db.GetPostsForUserParams{
-			UserID: user.ID,
-			Limit:  int32(limit),
+			UserID:  user.ID,
+			Column2: order,
+			Limit:   int32(limit),
 		})
 	if err != nil {
 		return fmt.Errorf("couldn't get posts for user: %w", err)

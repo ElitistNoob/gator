@@ -64,13 +64,16 @@ WITH users_feed AS (
 SELECT posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id, f.name AS feed_name FROM posts
 JOIN users_feed uf ON posts.feed_id = uf.feed_id
 JOIN feeds f ON posts.feed_id = f.id
-ORDER BY posts.created_at DESC
-LIMIT $2
+ORDER BY 
+CASE WHEN $2 = 'asc' THEN posts.created_at END ASC,
+CASE WHEN $2 = 'desc' THEN posts.created_at END DESC
+LIMIT $3
 `
 
 type GetPostsForUserParams struct {
-	UserID uuid.UUID
-	Limit  int32
+	UserID  uuid.UUID
+	Column2 interface{}
+	Limit   int32
 }
 
 type GetPostsForUserRow struct {
@@ -86,7 +89,7 @@ type GetPostsForUserRow struct {
 }
 
 func (q *Queries) GetPostsForUser(ctx context.Context, arg GetPostsForUserParams) ([]GetPostsForUserRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUser, arg.UserID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getPostsForUser, arg.UserID, arg.Column2, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
