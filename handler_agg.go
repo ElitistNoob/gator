@@ -58,6 +58,7 @@ func scrapeFeeds(ctx context.Context, s *state) error {
 			return err
 		}
 
+		fmt.Println(item.PubDate)
 		params := db.CreatePostParams{
 			ID:          uuid.New(),
 			CreatedAt:   time.Now().UTC(),
@@ -69,16 +70,13 @@ func scrapeFeeds(ctx context.Context, s *state) error {
 			FeedID:      nextFeed.ID,
 		}
 
-		post, err := s.db.CreatePost(ctx, params)
-		if err != nil {
+		if _, err := s.db.CreatePost(ctx, params); err != nil {
 			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 				continue
 			} else {
 				return fmt.Errorf("couldn't create post: %w", err)
 			}
 		}
-
-		fmt.Printf("%s, created Succesfully!\n", post.Title)
 	}
 
 	return nil
