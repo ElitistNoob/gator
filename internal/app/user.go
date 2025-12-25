@@ -1,22 +1,23 @@
-package main
+package app
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/google/uuid"
 )
 
-func handlerRegister(s *state, c command) error {
-	if len(c.args) < 1 {
+func RegisterUser(s *core.State, c core.Command) error {
+	if len(c.Args) < 1 {
 		return fmt.Errorf("a name was not provided")
 	}
 
 	ctx := context.Background()
 	currentTime := time.Now().UTC()
-	userName := c.args[0]
+	userName := c.Args[0]
 
 	args := db.CreateUserParams{
 		ID:        uuid.New(),
@@ -25,12 +26,12 @@ func handlerRegister(s *state, c command) error {
 		Name:      userName,
 	}
 
-	user, err := s.db.CreateUser(ctx, args)
+	user, err := s.DB.CreateUser(ctx, args)
 	if err != nil {
 		return err
 	}
 
-	if err := s.cfg.SetUser(user.Name); err != nil {
+	if err := s.Cfg.SetUser(user.Name); err != nil {
 		return err
 	}
 
@@ -44,20 +45,20 @@ func handlerRegister(s *state, c command) error {
 	return nil
 }
 
-func handlerLogin(s *state, c command) error {
-	if len(c.args) < 1 {
+func Login(s *core.State, c core.Command) error {
+	if len(c.Args) < 1 {
 		return fmt.Errorf("user name is required")
 	}
 
 	ctx := context.Background()
-	userName := c.args[0]
+	userName := c.Args[0]
 
-	user, err := s.db.GetUser(ctx, userName)
+	user, err := s.DB.GetUser(ctx, userName)
 	if err != nil {
 		return err
 	}
 
-	if err := s.cfg.SetUser(user.Name); err != nil {
+	if err := s.Cfg.SetUser(user.Name); err != nil {
 		return err
 	}
 
@@ -65,9 +66,9 @@ func handlerLogin(s *state, c command) error {
 	return nil
 }
 
-func handlerGetUsers(s *state, c command) error {
+func GetUsers(s *core.State, c core.Command) error {
 	ctx := context.Background()
-	users, err := s.db.GetUsers(ctx)
+	users, err := s.DB.GetUsers(ctx)
 	if err != nil {
 		return fmt.Errorf("error getting users: %w", err)
 	}
@@ -76,7 +77,7 @@ func handlerGetUsers(s *state, c command) error {
 		return fmt.Errorf("users table is empty")
 	}
 
-	currentUser := s.cfg.Current_user_name
+	currentUser := s.Cfg.Current_user_name
 	for _, user := range users {
 		string := fmt.Sprintf("* %s", user.Name)
 		if user.Name == currentUser {

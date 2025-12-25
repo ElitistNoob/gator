@@ -1,21 +1,22 @@
-package main
+package app
 
 import (
 	"context"
 	"fmt"
 	"time"
 
+	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/google/uuid"
 )
 
-func handlerAddFeed(s *state, c command, user db.User) error {
-	if len(c.args) != 2 {
-		return fmt.Errorf("expects arguments: <name> <url>\nGot: %v", c.args)
+func AddFeed(s *core.State, c core.Command, user db.User) error {
+	if len(c.Args) != 2 {
+		return fmt.Errorf("expects arguments: <name> <url>\nGot: %v", c.Args)
 	}
 
 	ctx := context.Background()
-	name, url := c.args[0], c.args[1]
+	name, url := c.Args[0], c.Args[1]
 	args := db.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
@@ -24,7 +25,7 @@ func handlerAddFeed(s *state, c command, user db.User) error {
 		Url:       url,
 		UserID:    user.ID,
 	}
-	feed, err := s.db.CreateFeed(ctx, args)
+	feed, err := s.DB.CreateFeed(ctx, args)
 	if err != nil {
 		return err
 	}
@@ -39,7 +40,7 @@ func handlerAddFeed(s *state, c command, user db.User) error {
 		UserID:    user.ID,
 		FeedID:    feed.ID,
 	}
-	feedFollow, err := s.db.CreateFeedFollow(ctx, createFeedFollowArgs)
+	feedFollow, err := s.DB.CreateFeedFollow(ctx, createFeedFollowArgs)
 	if err != nil {
 		return err
 	}
@@ -52,8 +53,8 @@ func handlerAddFeed(s *state, c command, user db.User) error {
 	return nil
 }
 
-func handlerGetFeeds(s *state, c command) error {
-	feeds, err := s.db.GetFeeds(context.Background())
+func GetFeeds(s *core.State, c core.Command) error {
+	feeds, err := s.DB.GetFeeds(context.Background())
 	if err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func handlerGetFeeds(s *state, c command) error {
 
 	fmt.Printf("Found %d feeds:\n", len(feeds))
 	for _, feed := range feeds {
-		user, err := s.db.GetUserById(context.Background(), feed.UserID)
+		user, err := s.DB.GetUserById(context.Background(), feed.UserID)
 		if err != nil {
 			return err
 		}

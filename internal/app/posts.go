@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/ElitistNoob/gator/internal/timeutils"
 )
 
-func handlerBrowse(s *state, c command, user db.User) error {
+func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 	now := time.Now()
 	today := time.Date(
 		now.Year(), now.Month(), now.Day(),
@@ -27,7 +28,7 @@ func handlerBrowse(s *state, c command, user db.User) error {
 	f.StringVar(&fromStr, "from", "", "start date (inclusive), format: YYYY-MM-DD")
 	f.StringVar(&toStr, "to", today, "end date (exclusive), format: YYYY-MM-DD")
 	f.StringVar(&order, "order", "desc", "order of post to show by created at")
-	if err := f.Parse(c.args); err != nil {
+	if err := f.Parse(c.Args); err != nil {
 		return err
 	}
 
@@ -56,7 +57,7 @@ func handlerBrowse(s *state, c command, user db.User) error {
 	}
 
 	ctx := context.Background()
-	posts, err := s.db.GetPostsForUser(ctx,
+	posts, err := s.DB.GetPostsForUser(ctx,
 		db.GetPostsForUserParams{
 			UserID:        user.ID,
 			PublishedAt:   fromDate,

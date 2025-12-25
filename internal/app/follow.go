@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -6,17 +6,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/google/uuid"
 )
 
-func handlerFollow(s *state, c command, user db.User) error {
-	if len(c.args) < 1 {
+func FollowFeed(s *core.State, c core.Command, user db.User) error {
+	if len(c.Args) < 1 {
 		return errors.New("no argument passed\nexpected: <url>")
 	}
 
-	ctx, url := context.Background(), c.args[0]
-	feed, err := s.db.GetFeedByUrl(ctx, url)
+	ctx, url := context.Background(), c.Args[0]
+	feed, err := s.DB.GetFeedByUrl(ctx, url)
 	if err != nil {
 		return fmt.Errorf("couldn't get feed with url: %v\nerr: %w", url, err)
 	}
@@ -29,7 +30,7 @@ func handlerFollow(s *state, c command, user db.User) error {
 		UserID:    user.ID,
 		FeedID:    feed.ID,
 	}
-	d, err := s.db.CreateFeedFollow(ctx, args)
+	d, err := s.DB.CreateFeedFollow(ctx, args)
 	if err != nil {
 		return err
 	}
@@ -42,10 +43,10 @@ func handlerFollow(s *state, c command, user db.User) error {
 	return nil
 }
 
-func handlerFollowing(s *state, c command, user db.User) error {
+func Following(s *core.State, c core.Command, user db.User) error {
 	ctx := context.Background()
 
-	feeds, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
+	feeds, err := s.DB.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
 		return err
 	}
@@ -62,13 +63,13 @@ func handlerFollowing(s *state, c command, user db.User) error {
 	return nil
 }
 
-func handlerUnfollow(s *state, c command, user db.User) error {
-	if len(c.args) != 1 {
-		return fmt.Errorf("expected: %s <feed_url>\ngot: %s <null>", c.name, c.name)
+func Unfollow(s *core.State, c core.Command, user db.User) error {
+	if len(c.Args) != 1 {
+		return fmt.Errorf("expected: %s <feed_url>\ngot: %s <null>", c.Name, c.Name)
 	}
 
 	ctx := context.Background()
-	feed, err := s.db.GetFeedByUrl(ctx, c.args[0])
+	feed, err := s.DB.GetFeedByUrl(ctx, c.Args[0])
 	if err != nil {
 		return fmt.Errorf("couldn't get feed:\n err: %w", err)
 	}
@@ -78,7 +79,7 @@ func handlerUnfollow(s *state, c command, user db.User) error {
 		FeedID: feed.ID,
 	}
 
-	if err := s.db.DeleteFeedFollow(context.Background(), args); err != nil {
+	if err := s.DB.DeleteFeedFollow(context.Background(), args); err != nil {
 		return fmt.Errorf("couldn't delete follow record: %w", err)
 	}
 

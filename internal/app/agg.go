@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -7,18 +7,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/ElitistNoob/gator/internal/dbutils"
 	"github.com/ElitistNoob/gator/internal/timeutils"
+	"github.com/ElitistNoob/gator/rss"
 	"github.com/google/uuid"
 )
 
-func agg(s *state, c command) error {
-	if len(c.args) != 1 {
+func Agg(s *core.State, c core.Command) error {
+	if len(c.Args) != 1 {
 		return fmt.Errorf("usage: agg <timeBetweenReqs>")
 	}
 
-	timeBetweenReqs := c.args[0]
+	timeBetweenReqs := c.Args[0]
 	timeInterval, err := time.ParseDuration(timeBetweenReqs)
 	if err != nil {
 		return fmt.Errorf("invalid duration %w", err)
@@ -36,22 +38,21 @@ func agg(s *state, c command) error {
 	}
 }
 
-func scrapeFeeds(ctx context.Context, s *state) error {
-	nextFeed, err := s.db.GetNextFeedToFetch(ctx)
+func scrapeFeeds(ctx context.Context, s *core.State) error {
+	nextFeed, err := s.DB.GetNextFeedToFetch(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to fetch next feed: %w", err)
 	}
 
-	rssFeed, err := fetchFeed(ctx, nextFeed.Url)
+	rssFeed, err := rss.FetchFeed(ctx, nextFeed.Url)
 	if err != nil {
 		return fmt.Errorf("failed to fetch feed %s: %w", nextFeed.Name, err)
 	}
 
-	if err := s.db.MarkFeedFetched(ctx, nextFeed.ID); err != nil {
+	if err := s.DB.MarkFeedFetched(ctx, nextFeed.ID); err != nil {
 		return fmt.Errorf("failed to mark feed as fetched: %w", err)
 	}
 
-	fmt.Printf("length: %d\n", len(rssFeed.Channel.Item))
 	for _, item := range rssFeed.Channel.Item {
 		pubDate, err := timeutils.ParseTime(item.PubDate)
 		if err != nil {
@@ -69,7 +70,7 @@ func scrapeFeeds(ctx context.Context, s *state) error {
 			FeedID:      nextFeed.ID,
 		}
 
-		if _, err := s.db.CreatePost(ctx, params); err != nil {
+		if _, err := s.DB.CreatePost(ctx, params); err != nil {
 			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 				continue
 			} else {
