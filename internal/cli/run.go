@@ -1,13 +1,10 @@
 package cli
 
 import (
-	"database/sql"
 	"log"
 
 	"github.com/ElitistNoob/gator/internal/app"
-	"github.com/ElitistNoob/gator/internal/config"
 	"github.com/ElitistNoob/gator/internal/core"
-	"github.com/ElitistNoob/gator/internal/database"
 	_ "github.com/lib/pq"
 )
 
@@ -16,22 +13,9 @@ func Run(args []string) error {
 		log.Fatalln("not enough arguments were provided")
 	}
 
-	cfg, err := config.Read()
+	state, err := app.Initialize()
 	if err != nil {
-		log.Fatalln(err)
-	}
-
-	db, err := sql.Open("postgres", cfg.Db_url)
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
-	defer db.Close()
-
-	dbQueries := database.New(db)
-
-	state := &core.State{
-		DB:  dbQueries,
-		Cfg: cfg,
+		log.Fatalf("failed to initialize app: %s", err)
 	}
 
 	c := NewCommand()
