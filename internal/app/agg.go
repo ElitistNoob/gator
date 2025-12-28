@@ -15,15 +15,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func Agg(s *core.State, c core.Command) error {
+func Agg(s *core.State, c core.Command) (string, error) {
 	if len(c.Args) != 1 {
-		return fmt.Errorf("usage: agg <timeBetweenReqs>")
+		return "", fmt.Errorf("usage: agg <timeBetweenReqs>")
 	}
 
 	timeBetweenReqs := c.Args[0]
 	timeInterval, err := time.ParseDuration(timeBetweenReqs)
 	if err != nil {
-		return fmt.Errorf("invalid duration %w", err)
+		return "", fmt.Errorf("invalid duration %w", err)
 	}
 
 	fmt.Printf("Collecting feeds every %s\n", timeInterval)

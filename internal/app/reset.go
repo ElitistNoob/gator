@@ -7,11 +7,10 @@ import (
 	"github.com/ElitistNoob/gator/internal/core"
 )
 
-func ResetDB(s *core.State, c core.Command) error {
+func ResetDB(s *core.State, c core.Command) (string, error) {
 	if err := s.DB.DeleteUsers(context.Background()); err != nil {
-		return fmt.Errorf("couldn't delete rows in table: %w", err)
+		return "", fmt.Errorf("couldn't delete rows in table: %w", err)
 	}
 
-	fmt.Println("rows deleted successfully")
-	return nil
+	return "rows deleted successfully", nil
 }

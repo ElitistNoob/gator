@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ElitistNoob/gator/internal/core"
@@ -10,9 +11,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func RegisterUser(s *core.State, c core.Command) error {
+func RegisterUser(s *core.State, c core.Command) (string, error) {
 	if len(c.Args) < 1 {
-		return fmt.Errorf("a name was not provided")
+		return "", fmt.Errorf("a name was not provided")
 	}
 
 	ctx := context.Background()
@@ -28,11 +29,11 @@ func RegisterUser(s *core.State, c core.Command) error {
 
 	user, err := s.DB.CreateUser(ctx, args)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := s.Cfg.SetUser(user.Name); err != nil {
-		return err
+		return "", err
 	}
 
 	fmt.Printf("user was successfully created:\n")
@@ -42,12 +43,12 @@ func RegisterUser(s *core.State, c core.Command) error {
 	fmt.Printf("> Updated_at:   %v\n", user.CreatedAt)
 	fmt.Printf("> Name:         %s\n", user.Name)
 
-	return nil
+	return fmt.Sprintln("user registered successfully"), nil
 }
 
-func Login(s *core.State, c core.Command) error {
+func Login(s *core.State, c core.Command) (string, error) {
 	if len(c.Args) < 1 {
-		return fmt.Errorf("user name is required")
+		return "", fmt.Errorf("user name is required")
 	}
 
 	ctx := context.Background()
@@ -55,37 +56,36 @@ func Login(s *core.State, c core.Command) error {
 
 	user, err := s.DB.GetUser(ctx, userName)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if err := s.Cfg.SetUser(user.Name); err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("User %s has been successfully logged in", user.Name)
-	return nil
+	return fmt.Sprintf("User %s has been successfully logged in", user.Name), nil
 }
 
-func GetUsers(s *core.State, c core.Command) error {
+func GetUsers(s *core.State, c core.Command) (string, error) {
 	ctx := context.Background()
 	users, err := s.DB.GetUsers(ctx)
 	if err != nil {
-		return fmt.Errorf("error getting users: %w", err)
+		return "", fmt.Errorf("error getting users: %w", err)
 	}
 
 	if len(users) == 0 {
-		return fmt.Errorf("users table is empty")
+		return "", fmt.Errorf("users table is empty")
 	}
 
 	currentUser := s.Cfg.Current_user_name
+	var str strings.Builder
+	fmt.Fprintf(&str, "%d users found\n\n", len(users))
 	for _, user := range users {
-		string := fmt.Sprintf("* %s", user.Name)
+		fmt.Fprintf(&str, "* %s", user.Name)
 		if user.Name == currentUser {
-			string += " (current)"
+			fmt.Fprintln(&str, " (current)")
 		}
-
-		fmt.Println(string)
 	}
 
-	return nil
+	return str.String(), nil
 }

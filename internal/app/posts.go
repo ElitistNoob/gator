@@ -12,7 +12,7 @@ import (
 	"github.com/ElitistNoob/gator/internal/timeutils"
 )
 
-func BrowsePosts(s *core.State, c core.Command, user db.User) error {
+func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 	now := time.Now()
 	today := time.Date(
 		now.Year(), now.Month(), now.Day(),
@@ -29,23 +29,23 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 	f.StringVar(&toStr, "to", today, "end date (exclusive), format: YYYY-MM-DD")
 	f.StringVar(&order, "order", "desc", "order of post to show by created at")
 	if err := f.Parse(c.Args); err != nil {
-		return err
+		return "", err
 	}
 
 	if limit <= 0 {
-		return fmt.Errorf("limit must be greater than 0")
+		return "", fmt.Errorf("limit must be greater than 0")
 	}
 
 	order = strings.ToLower(order)
 	if order != "asc" && order != "desc" {
-		return fmt.Errorf("order must be 'asc' or 'desc'")
+		return "", fmt.Errorf("order must be 'asc' or 'desc'")
 	}
 
 	var fromDate time.Time
 	if fromStr != "" {
 		t, err := timeutils.ParseTime(fromStr)
 		if err != nil {
-			return fmt.Errorf("wrong date format: %w", err)
+			return "", fmt.Errorf("wrong date format: %w", err)
 		}
 
 		fromDate = t
@@ -53,7 +53,7 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 
 	toDate, err := timeutils.ParseTime(toStr)
 	if err != nil {
-		return fmt.Errorf("wrong date format: %w", err)
+		return "", fmt.Errorf("wrong date format: %w", err)
 	}
 
 	ctx := context.Background()
@@ -66,7 +66,7 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 			Limit:         int32(limit),
 		})
 	if err != nil {
-		return fmt.Errorf("couldn't get posts for user: %w", err)
+		return "", fmt.Errorf("couldn't get posts for user: %w", err)
 	}
 
 	fmt.Printf("Found %d posts for user %s\n", len(posts), user.Name)
@@ -83,5 +83,5 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 		fmt.Println()
 	}
 
-	return nil
+	return "", nil
 }
