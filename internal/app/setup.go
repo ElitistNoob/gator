@@ -7,9 +7,10 @@ import (
 	"github.com/ElitistNoob/gator/internal/config"
 	"github.com/ElitistNoob/gator/internal/core"
 	"github.com/ElitistNoob/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
-func Initialize() (*core.State, error) {
+func Initialize(m core.RunMode) (*core.State, error) {
 	cfg, err := config.Read()
 	if err != nil {
 		log.Fatalln(err)
@@ -19,13 +20,12 @@ func Initialize() (*core.State, error) {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-	defer db.Close()
-
-	dbQueries := database.New(db)
 
 	state := &core.State{
-		DB:  dbQueries,
-		Cfg: cfg,
+		DB:    database.New(db),
+		SQLDB: db,
+		Cfg:   cfg,
+		Mode:  m,
 	}
 
 	return state, nil

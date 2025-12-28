@@ -1,22 +1,23 @@
 package cli
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/ElitistNoob/gator/internal/app"
 	"github.com/ElitistNoob/gator/internal/core"
-	_ "github.com/lib/pq"
 )
 
-func Run(args []string) error {
+func Run(args []string) (string, error) {
 	if len(args) < 2 {
 		log.Fatalln("not enough arguments were provided")
 	}
 
-	state, err := app.Initialize()
+	state, err := app.Initialize(core.ModeCLI)
 	if err != nil {
 		log.Fatalf("failed to initialize app: %s", err)
 	}
+	defer state.SQLDB.Close()
 
 	c := NewCommand()
 
@@ -37,5 +38,14 @@ func Run(args []string) error {
 	// Posts commands
 	c.register("browse", app.MiddlewareLoggedIn(app.BrowsePosts))
 
-	return c.Run(state, core.Command{Name: args[1], Args: args[2:]})
+	out, err := c.Run(state, core.Command{Name: args[1], Args: args[2:]})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if state.Mode == core.ModeCLI {
+		fmt.Print(out)
+	}
+
+	return out, err
 }
