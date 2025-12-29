@@ -5,10 +5,18 @@ import (
 	"os"
 
 	"github.com/ElitistNoob/gator/internal/cli"
+	"github.com/ElitistNoob/gator/internal/tui"
 )
 
 func main() {
-	if err := cli.Run(os.Args); err != nil {
-		log.Fatal(err)
+	if len(os.Args) > 1 {
+		_, err := cli.Run(os.Args)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		if err := tui.Run(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }

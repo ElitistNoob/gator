@@ -8,6 +8,7 @@ import (
 
 	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
+	"github.com/ElitistNoob/gator/internal/tui/styles"
 	"github.com/google/uuid"
 )
 
@@ -36,14 +37,16 @@ func RegisterUser(s *core.State, c core.Command) (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("user was successfully created:\n")
+	var str strings.Builder
 
-	fmt.Printf("> ID:           %v\n", user.ID)
-	fmt.Printf("> Created_at:   %v\n", user.CreatedAt)
-	fmt.Printf("> Updated_at:   %v\n", user.CreatedAt)
-	fmt.Printf("> Name:         %s\n", user.Name)
+	fmt.Fprintf(&str, "%s\n", "user was successfully created:\n")
 
-	return fmt.Sprintln("user registered successfully"), nil
+	fmt.Fprintf(&str, "> ID:           %v\n", user.ID)
+	fmt.Fprintf(&str, "> Created_at:   %v\n", user.CreatedAt)
+	fmt.Fprintf(&str, "> Updated_at:   %v\n", user.CreatedAt)
+	fmt.Fprintf(&str, "> Name:         %s\n", user.Name)
+
+	return str.String(), nil
 }
 
 func Login(s *core.State, c core.Command) (string, error) {
@@ -63,10 +66,12 @@ func Login(s *core.State, c core.Command) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("User %s has been successfully logged in", user.Name), nil
+	return fmt.Sprintf("\n\nUser %s has been successfully logged in", styles.Highlight.Render(user.Name)), nil
 }
 
 func GetUsers(s *core.State, c core.Command) (string, error) {
+	var str strings.Builder
+
 	ctx := context.Background()
 	users, err := s.DB.GetUsers(ctx)
 	if err != nil {
@@ -74,16 +79,18 @@ func GetUsers(s *core.State, c core.Command) (string, error) {
 	}
 
 	if len(users) == 0 {
-		return "", fmt.Errorf("users table is empty")
+		return "no registered users", fmt.Errorf("users table is empty")
 	}
 
 	currentUser := s.Cfg.Current_user_name
-	var str strings.Builder
 	fmt.Fprintf(&str, "%d users found\n\n", len(users))
-	for _, user := range users {
-		fmt.Fprintf(&str, "* %s", user.Name)
+	for i, user := range users {
+		fmt.Fprintf(&str, "%s %s", styles.Highlight.Render("*"), user.Name)
 		if user.Name == currentUser {
 			fmt.Fprintln(&str, " (current)")
+		}
+		if i != len(users) {
+			fmt.Fprintf(&str, "\n")
 		}
 	}
 

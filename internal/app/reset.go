@@ -12,5 +12,5 @@ func ResetDB(s *core.State, c core.Command) (string, error) {
 		return "", fmt.Errorf("couldn't delete rows in table: %w", err)
 	}
 
-	return "rows deleted successfully", nil
+	return "DB cleared successfully", nil
 }

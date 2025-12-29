@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ElitistNoob/gator/internal/core"
@@ -35,12 +36,13 @@ func FollowFeed(s *core.State, c core.Command, user db.User) (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("feed followed successfully:\n")
+	var str strings.Builder
+	fmt.Fprintf(&str, "feed followed successfully:\n")
 
-	fmt.Printf("> feed_name:   %v\n", d.FeedName)
-	fmt.Printf("> user_name:   %v\n", d.UserName)
+	fmt.Fprintf(&str, "> feed_name:   %v\n", d.FeedName)
+	fmt.Fprintf(&str, "> user_name:   %v\n", d.UserName)
 
-	return "", nil
+	return str.String(), nil
 }
 
 func Following(s *core.State, c core.Command, user db.User) (string, error) {
@@ -51,16 +53,17 @@ func Following(s *core.State, c core.Command, user db.User) (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("following feed:\n")
+	var str strings.Builder
+	fmt.Fprintf(&str, "following feed:\n")
 	for _, feed := range feeds {
-		fmt.Printf("> ID:   %v\n", feed.ID)
-		fmt.Printf("> CreateAt:   %v\n", feed.CreatedAt)
-		fmt.Printf("> UpdatedAt:   %v\n", feed.UpdatedAt)
-		fmt.Printf("> feed_name:   %v\n", feed.FeedName)
-		fmt.Printf("> user_name:   %v\n", feed.UserName)
+		fmt.Fprintf(&str, "> ID:   %v\n", feed.ID)
+		fmt.Fprintf(&str, "> CreateAt:   %v\n", feed.CreatedAt)
+		fmt.Fprintf(&str, "> UpdatedAt:   %v\n", feed.UpdatedAt)
+		fmt.Fprintf(&str, "> feed_name:   %v\n", feed.FeedName)
+		fmt.Fprintf(&str, "> user_name:   %v\n", feed.UserName)
 	}
 
-	return "", nil
+	return str.String(), nil
 }
 
 func Unfollow(s *core.State, c core.Command, user db.User) (string, error) {
@@ -83,6 +86,6 @@ func Unfollow(s *core.State, c core.Command, user db.User) (string, error) {
 		return "", fmt.Errorf("couldn't delete follow record: %w", err)
 	}
 
-	fmt.Printf("%s unfollowed successfully", feed.Name)
-	return "", nil
+	str := fmt.Sprintf("%s unfollowed successfully", feed.Name)
+	return str, nil
 }

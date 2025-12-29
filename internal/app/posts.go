@@ -69,19 +69,16 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 		return "", fmt.Errorf("couldn't get posts for user: %w", err)
 	}
 
-	fmt.Printf("Found %d posts for user %s\n", len(posts), user.Name)
+	var str strings.Builder
+	fmt.Fprintf(&str, "Found %d posts for user %s\n", len(posts), user.Name)
 	for i, post := range posts {
-		fmt.Println()
-		fmt.Printf("> Blog %d:\n", i+1)
-		fmt.Printf(" - From: %s\n", post.FeedName)
-		fmt.Printf(" - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
-		fmt.Printf(" - Title: %s\n", post.Title)
-		fmt.Printf(" - Description: %s\n", post.Description.String)
-		fmt.Printf(" - Url: %s\n", post.Url)
-		fmt.Println()
-		fmt.Println("=============================================")
-		fmt.Println()
+		fmt.Fprintf(&str, "> Blog %d:\n", i+1)
+		fmt.Fprintf(&str, " - From: %s\n", post.FeedName)
+		fmt.Fprintf(&str, " - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
+		fmt.Fprintf(&str, " - Title: %s\n", post.Title)
+		fmt.Fprintf(&str, " - Description: %s\n", post.Description.String)
+		fmt.Fprintf(&str, " - Url: %s\n", post.Url)
 	}
 
-	return "", nil
+	return str.String(), nil
 }
