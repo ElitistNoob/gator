@@ -30,7 +30,7 @@ func RegisterUser(s *core.State, c core.Command) (string, error) {
 
 	user, err := s.DB.CreateUser(ctx, args)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%s could not be registered, user already exist", userName)
 	}
 
 	if err := s.Cfg.SetUser(user.Name); err != nil {
@@ -79,7 +79,7 @@ func GetUsers(s *core.State, c core.Command) (string, error) {
 	}
 
 	if len(users) == 0 {
-		return "no registered users", fmt.Errorf("users table is empty")
+		return "", fmt.Errorf("users table is empty")
 	}
 
 	var str strings.Builder
@@ -90,12 +90,11 @@ func GetUsers(s *core.State, c core.Command) (string, error) {
 	lines = append(lines, headerStr)
 
 	for _, user := range users {
-		var userStr strings.Builder
-		fmt.Fprintf(&userStr, "%s %s", styles.Highlight.Render("*"), user.Name)
+		userStr := fmt.Sprintf("%s %s", styles.Highlight.Render("*"), user.Name)
 		if user.Name == currentUser {
-			fmt.Fprintln(&userStr, " (current)")
+			userStr += styles.Highlight.Render(" (current)")
 		}
-		lines = append(lines, userStr.String())
+		lines = append(lines, userStr)
 	}
 	str.WriteString(strings.Join(lines, "\n"))
 
