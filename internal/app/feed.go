@@ -9,7 +9,6 @@ import (
 	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/ElitistNoob/gator/internal/tui/styles"
-	// "github.com/charmbracelet/lipgloss"
 	"github.com/google/uuid"
 )
 
@@ -20,6 +19,9 @@ func AddFeed(s *core.State, c core.Command, user db.User) (string, error) {
 
 	ctx := context.Background()
 	name, url := c.Args[0], c.Args[1]
+	if c.Args[0] == "" || c.Args[1] == "" {
+		return "", fmt.Errorf("Name and Url values cannot be empty")
+	}
 	args := db.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
