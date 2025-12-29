@@ -8,6 +8,8 @@ import (
 
 	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
+	"github.com/ElitistNoob/gator/internal/tui/styles"
+	// "github.com/charmbracelet/lipgloss"
 	"github.com/google/uuid"
 )
 
@@ -66,19 +68,27 @@ func GetFeeds(s *core.State, c core.Command) (string, error) {
 	}
 
 	var str strings.Builder
-	fmt.Fprintf(&str, "Found %d feeds:\n\n", len(feeds))
+	strLines := make([]string, 0, len(feeds))
+	strLines = append(strLines, fmt.Sprintf(styles.Header.Render("Found %d feeds:"), len(feeds)))
 	for _, feed := range feeds {
 		user, err := s.DB.GetUserById(context.Background(), feed.UserID)
 		if err != nil {
 			return "", err
 		}
-		fmt.Fprintf(&str, "> ID:           %s\n", feed.ID)
-		fmt.Fprintf(&str, "> CreatedAt:    %s\n", feed.CreatedAt)
-		fmt.Fprintf(&str, "> UpdateAt:     %s\n", feed.UpdatedAt)
-		fmt.Fprintf(&str, "> Name:         %s\n", feed.Name)
-		fmt.Fprintf(&str, "> Url:          %v\n", feed.Url)
-		fmt.Fprintf(&str, "> Username:     %v", user)
+
+		var feedStr strings.Builder
+		lines := make([]string, 0, len(feeds))
+		lines = append(lines, fmt.Sprintf("> ID:           %s", feed.ID))
+		lines = append(lines, fmt.Sprintf("> CreatedAt:    %s", feed.CreatedAt))
+		lines = append(lines, fmt.Sprintf("> UpdateAt:     %s", feed.UpdatedAt))
+		lines = append(lines, fmt.Sprintf("> Name:         %s", feed.Name))
+		lines = append(lines, fmt.Sprintf("> Url:          %v", feed.Url))
+		lines = append(lines, fmt.Sprintf("> Username:     %v", user))
+		feedStr.WriteString(strings.Join(lines, "\n"))
+		strLines = append(strLines,
+			styles.Result.Render(feedStr.String()))
 	}
 
+	str.WriteString(strings.Join(strLines, "\n\n"))
 	return str.String(), nil
 }
