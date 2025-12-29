@@ -40,7 +40,7 @@ func FollowFeed(s *core.State, c core.Command, user db.User) (string, error) {
 	fmt.Fprintf(&str, "feed followed successfully:\n")
 
 	fmt.Fprintf(&str, "> feed_name:   %v\n", d.FeedName)
-	fmt.Fprintf(&str, "> user_name:   %v\n", d.UserName)
+	fmt.Fprintf(&str, "> user_name:   %v", d.UserName)
 
 	return str.String(), nil
 }
@@ -60,7 +60,7 @@ func Following(s *core.State, c core.Command, user db.User) (string, error) {
 		fmt.Fprintf(&str, "> CreateAt:   %v\n", feed.CreatedAt)
 		fmt.Fprintf(&str, "> UpdatedAt:   %v\n", feed.UpdatedAt)
 		fmt.Fprintf(&str, "> feed_name:   %v\n", feed.FeedName)
-		fmt.Fprintf(&str, "> user_name:   %v\n", feed.UserName)
+		fmt.Fprintf(&str, "> user_name:   %v", feed.UserName)
 	}
 
 	return str.String(), nil

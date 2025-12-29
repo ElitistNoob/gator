@@ -44,7 +44,7 @@ func RegisterUser(s *core.State, c core.Command) (string, error) {
 	fmt.Fprintf(&str, "> ID:           %v\n", user.ID)
 	fmt.Fprintf(&str, "> Created_at:   %v\n", user.CreatedAt)
 	fmt.Fprintf(&str, "> Updated_at:   %v\n", user.CreatedAt)
-	fmt.Fprintf(&str, "> Name:         %s\n", user.Name)
+	fmt.Fprintf(&str, "> Name:         %s", user.Name)
 
 	return str.String(), nil
 }
@@ -66,11 +66,11 @@ func Login(s *core.State, c core.Command) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("\n\nUser %s has been successfully logged in", styles.Highlight.Render(user.Name)), nil
+	return fmt.Sprintf("User %s has been successfully logged in", styles.Highlight.Render(user.Name)), nil
 }
 
 func GetUsers(s *core.State, c core.Command) (string, error) {
-	var str strings.Builder
+	currentUser := s.Cfg.Current_user_name
 
 	ctx := context.Background()
 	users, err := s.DB.GetUsers(ctx)
@@ -82,17 +82,22 @@ func GetUsers(s *core.State, c core.Command) (string, error) {
 		return "no registered users", fmt.Errorf("users table is empty")
 	}
 
-	currentUser := s.Cfg.Current_user_name
-	fmt.Fprintf(&str, "%d users found\n\n", len(users))
-	for i, user := range users {
-		fmt.Fprintf(&str, "%s %s", styles.Highlight.Render("*"), user.Name)
+	var str strings.Builder
+	lines := make([]string, 0, len(users))
+	usersLen := fmt.Sprintf("%d", len(users))
+
+	headerStr := styles.Header.Render(fmt.Sprintf("%s users found:\n", usersLen))
+	lines = append(lines, headerStr)
+
+	for _, user := range users {
+		var userStr strings.Builder
+		fmt.Fprintf(&userStr, "%s %s", styles.Highlight.Render("*"), user.Name)
 		if user.Name == currentUser {
-			fmt.Fprintln(&str, " (current)")
+			fmt.Fprintln(&userStr, " (current)")
 		}
-		if i != len(users) {
-			fmt.Fprintf(&str, "\n")
-		}
+		lines = append(lines, userStr.String())
 	}
+	str.WriteString(strings.Join(lines, "\n"))
 
 	return str.String(), nil
 }

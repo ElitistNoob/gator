@@ -20,10 +20,9 @@ func (m model) View() string {
 
 func selectionView(m model) string {
 	var str strings.Builder
-	fmt.Fprintf(&str, "%s", styles.Header.Render("Select a command to run")+"\n\n")
+	lines := make([]string, 0, len(m.commands))
 
-	var body strings.Builder
-	bodyLines := make([]string, 0, len(m.commands))
+	lines = append(lines, styles.Header.Render("Select a command to run:\n"))
 	for i, command := range m.commands {
 		cursor := " "
 		if m.cursor == i {
@@ -31,11 +30,10 @@ func selectionView(m model) string {
 		}
 
 		c := fmt.Sprintf("[%s]", cursor)
-		bodyLines = append(bodyLines, fmt.Sprintf("%s %s", styles.CursorStyle.Render(c), command.Name))
+		lines = append(lines, fmt.Sprintf("%s %s", styles.CursorStyle.Render(c), command.Name))
 	}
-	body.WriteString(strings.Join(bodyLines, "\n"))
+	str.WriteString(styles.Content.Render(strings.Join(lines, "\n")))
 
-	fmt.Fprintf(&str, "%s", styles.Content.Render(body.String()))
 	footerText := fmt.Sprintf("Press %s to quit.", styles.FooterCmdStyle.Render("q"))
 	fmt.Fprintf(&str, "\n%s\n", styles.Footer.Render(footerText))
 
@@ -44,43 +42,30 @@ func selectionView(m model) string {
 
 func argumentView(m model) string {
 	var str strings.Builder
-	headerText := styles.Header.Render("Enter arguments:")
-	fmt.Fprintf(&str, "%s\n\n", headerText)
+	lines := make([]string, 0, len(m.argsInput))
 
-	var body strings.Builder
-	bodyLines := make([]string, 0, len(m.argsInput))
+	headerText := styles.Header.Render("Enter arguments:\n")
+	lines = append(lines, headerText)
+
 	for _, arg := range m.argsInput {
-		bodyLines = append(bodyLines, styles.Input.Render(arg.View()))
+		lines = append(lines, styles.Input.Render(arg.View()))
 	}
-	body.WriteString(strings.Join(bodyLines, "\n\n"))
-	fmt.Fprintf(&str, "%s\n", styles.Content.Render(body.String()))
+	str.WriteString(styles.Content.Render(strings.Join(lines, "\n\n")))
 
-	footerOptions := []menuItem{
-		{
-			Input:  "[tab]",
-			Action: "next",
-		},
-		{
-			Input:  "[esc]",
-			Action: "main menu",
-		},
-		{
-			Input:  "[enter]",
-			Action: "run",
-		},
-		{
-			Input:  "[ctrl+c]",
-			Action: "quit",
-		},
+	var menu strings.Builder
+	options := make([]string, 0, len(footerOptions))
+	for _, c := range footerOptions {
+		options = append(options, fmt.Sprintf("%s %s", styles.FooterCmdStyle.Render(c.Input), c.Action))
 	}
+	menu.WriteString(strings.Join(options, " "))
 
-	fmt.Fprintf(&str, "%s\n", styles.Footer.Render(renderHelper(footerOptions)))
+	fmt.Fprintf(&str, "\n%s\n", styles.Footer.Render(menu.String()))
 	return str.String()
 }
 
 func outputView(m model) string {
 	var str strings.Builder
-	fmt.Fprintf(&str, "\n%s\n", styles.Content.Render(string(m.output)))
+	fmt.Fprintf(&str, "%s\n", styles.Content.Render(string(m.output)))
 
 	footerText := fmt.Sprintf("Press %s to return to menu", styles.FooterCmdStyle.Render("esc"))
 	fmt.Fprintf(&str, "%s\n", styles.Footer.Render(footerText))
@@ -93,13 +78,21 @@ type menuItem struct {
 	Action string
 }
 
-func renderHelper(cmds []menuItem) string {
-	var str strings.Builder
-	lines := make([]string, 0, len(cmds))
-	for _, c := range cmds {
-		lines = append(lines, fmt.Sprintf("%s %s", styles.FooterCmdStyle.Render(c.Input), c.Action))
-	}
-	str.WriteString(strings.Join(lines, " "))
-
-	return str.String()
+var footerOptions = []menuItem{
+	{
+		Input:  "[tab]",
+		Action: "next",
+	},
+	{
+		Input:  "[esc]",
+		Action: "main menu",
+	},
+	{
+		Input:  "[enter]",
+		Action: "run",
+	},
+	{
+		Input:  "[ctrl+c]",
+		Action: "quit",
+	},
 }

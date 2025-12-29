@@ -1,7 +1,6 @@
 package styles
 
 import (
-	"log"
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
@@ -10,8 +9,16 @@ import (
 
 func getTermSize() (width int, height int) {
 	w, h, err := term.GetSize(os.Stdin.Fd())
+
+	maxWidth := 70
+	w = w - 2
+
 	if err != nil {
-		log.Fatal(err)
+		w = maxWidth
+	}
+
+	if w > maxWidth {
+		w = maxWidth
 	}
 
 	return w, h
@@ -20,17 +27,17 @@ func getTermSize() (width int, height int) {
 var termWidth, _ = getTermSize()
 
 var Header = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("12")).MarginTop(1)
+	Foreground(lipgloss.Color("12"))
 
 var Content = lipgloss.NewStyle().
-	Width(termWidth/2).
+	Width(termWidth).
 	Padding(1, 2).
 	Margin(0).
 	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("#3b3b3b"))
 
 var Footer = lipgloss.NewStyle().
-	Width(termWidth/2).
+	Width(termWidth).
 	Padding(0, 1).
 	Margin(0).
 	BorderStyle(lipgloss.RoundedBorder()).
@@ -42,7 +49,7 @@ var Input = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder())
 
 var CursorStyle = lipgloss.NewStyle().
-	Foreground(lipgloss.Color("10")).Bold(true)
+	Foreground(lipgloss.Color("10"))
 
 var FooterCmdStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("5")).Bold(true)

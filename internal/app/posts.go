@@ -77,7 +77,7 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 		fmt.Fprintf(&str, " - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
 		fmt.Fprintf(&str, " - Title: %s\n", post.Title)
 		fmt.Fprintf(&str, " - Description: %s\n", post.Description.String)
-		fmt.Fprintf(&str, " - Url: %s\n", post.Url)
+		fmt.Fprintf(&str, " - Url: %s", post.Url)
 	}
 
 	return str.String(), nil

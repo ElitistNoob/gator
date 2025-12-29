@@ -50,7 +50,7 @@ func AddFeed(s *core.State, c core.Command, user db.User) (string, error) {
 	fmt.Fprintf(&str, "feed followed successfully:\n\n")
 
 	fmt.Fprintf(&str, "> feed_name:   %v\n", feedFollow.FeedName)
-	fmt.Fprintf(&str, "> user_name:   %v\n", feedFollow.UserName)
+	fmt.Fprintf(&str, "> user_name:   %v", feedFollow.UserName)
 
 	return str.String(), nil
 }
@@ -77,7 +77,7 @@ func GetFeeds(s *core.State, c core.Command) (string, error) {
 		fmt.Fprintf(&str, "> UpdateAt:     %s\n", feed.UpdatedAt)
 		fmt.Fprintf(&str, "> Name:         %s\n", feed.Name)
 		fmt.Fprintf(&str, "> Url:          %v\n", feed.Url)
-		fmt.Fprintf(&str, "> Username:     %v\n\n", user)
+		fmt.Fprintf(&str, "> Username:     %v", user)
 	}
 
 	return str.String(), nil
