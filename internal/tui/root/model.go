@@ -30,6 +30,18 @@ type model struct {
 	errMsg          errMsg
 }
 
+func ResetModel(m model) model {
+	m.mode = cmdSelection
+	m.cursor = 0
+	m.selectedCommand = core.Command{}
+	m.argsInput = nil
+	m.argCursor = 0
+	m.output = ""
+	m.errMsg = errMsg{}
+
+	return m
+}
+
 func InitialModel(s *core.State) model {
 	return model{
 		mode:   cmdSelection,
@@ -37,7 +49,7 @@ func InitialModel(s *core.State) model {
 		cursor: 0,
 		commands: []core.Command{
 			{
-				Name: "Register",
+				Name: "Register User",
 				Args: []string{"Name"},
 				Run:  wrapCommand(app.RegisterUser),
 			},
@@ -47,19 +59,29 @@ func InitialModel(s *core.State) model {
 				Run:  wrapCommand(app.Login),
 			},
 			{
-				Name: "Users",
+				Name: "Display Users",
 				Args: []string{},
 				Run:  wrapCommand(app.GetUsers),
 			},
 			{
-				Name: "Add Feed",
+				Name: "Add New Feed",
 				Args: []string{"Name", "Url"},
 				Run:  wrapCommand(app.MiddlewareLoggedIn(app.AddFeed)),
 			},
 			{
-				Name: "View Feeds",
+				Name: "List Feeds",
 				Args: []string{},
 				Run:  wrapCommand(app.GetFeeds),
+			},
+			{
+				Name: "Follow Feed",
+				Args: []string{"Url"},
+				Run:  wrapCommand(app.MiddlewareLoggedIn(app.FollowFeed)),
+			},
+			{
+				Name: "Displays User's Feeds",
+				Args: []string{},
+				Run:  wrapCommand(app.MiddlewareLoggedIn(app.Following)),
 			},
 			{
 				Name: "Clear DB",
@@ -69,17 +91,6 @@ func InitialModel(s *core.State) model {
 		},
 		argCursor: 0,
 	}
-}
-
-func ResetModel(m model) model {
-	m.mode = cmdSelection
-	m.cursor = 0
-	m.argsInput = nil
-	m.argCursor = 0
-	m.errMsg = errMsg{}
-	m.selectedCommand = core.Command{}
-
-	return m
 }
 
 func (m model) selectCommand(idx int) (model, tea.Cmd) {
@@ -94,7 +105,6 @@ func (m model) selectCommand(idx int) (model, tea.Cmd) {
 
 	for i, argument := range m.selectedCommand.Args {
 		ti := textinput.New()
-		ti.Cursor.Blink = true
 		ti.Placeholder = fmt.Sprintf("enter %s", argument)
 		ti.Width = 22
 		ti.Prompt = styles.CursorStyle.Render(fmt.Sprintf("%s: ", argument))
