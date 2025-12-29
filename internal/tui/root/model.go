@@ -27,7 +27,7 @@ type model struct {
 	argsInput       []textinput.Model
 	argCursor       int
 	output          outputMsg
-	err             errMsg
+	errMsg          errMsg
 }
 
 func InitialModel(s *core.State) model {
@@ -76,6 +76,8 @@ func ResetModel(m model) model {
 	m.cursor = 0
 	m.argsInput = nil
 	m.argCursor = 0
+	m.errMsg = errMsg{}
+	m.selectedCommand = core.Command{}
 
 	return m
 }

@@ -6,7 +6,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case errMsg:
-		m.err = msg
+		m.errMsg = msg
 		return m, nil
 
 	case outputMsg:

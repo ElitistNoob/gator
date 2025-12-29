@@ -52,6 +52,11 @@ func argumentView(m model) string {
 	}
 	str.WriteString(styles.Content.Render(strings.Join(lines, "\n\n")))
 
+	err := m.errMsg.err
+	if err != nil {
+		fmt.Fprintf(&str, "\n%s", styles.Error.Render(m.errMsg.Error()))
+	}
+
 	var menu strings.Builder
 	options := make([]string, 0, len(footerOptions))
 	for _, c := range footerOptions {
