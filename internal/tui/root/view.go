@@ -30,7 +30,7 @@ func selectionView(m model) string {
 		}
 
 		c := fmt.Sprintf("[%s]", cursor)
-		lines = append(lines, fmt.Sprintf("%s %s", styles.CursorStyle.Render(c), command.Name))
+		lines = append(lines, fmt.Sprintf("%s %s\t", styles.CursorStyle.Render(c), command.Name))
 	}
 	str.WriteString(styles.Content.Render(strings.Join(lines, "\n")))
 
@@ -44,7 +44,7 @@ func argumentView(m model) string {
 	var str strings.Builder
 	lines := make([]string, 0, len(m.argsInput))
 
-	headerText := styles.Header.Render("Enter arguments:\n")
+	headerText := styles.Header.Render(fmt.Sprintf("%s:\n", m.selectedCommand.Name))
 	lines = append(lines, headerText)
 
 	for _, arg := range m.argsInput {
