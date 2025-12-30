@@ -84,6 +84,11 @@ func InitialModel(s *core.State) model {
 				Run:  wrapCommand(app.MiddlewareLoggedIn(app.Following)),
 			},
 			{
+				Name: "Browse Posts",
+				Args: []string{},
+				Run:  wrapCommand(app.MiddlewareLoggedIn(app.BrowsePosts)),
+			},
+			{
 				Name: "Clear DB",
 				Args: []string{},
 				Run:  wrapCommand(app.ResetDB),

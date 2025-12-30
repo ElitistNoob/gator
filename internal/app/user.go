@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -20,6 +21,10 @@ func RegisterUser(s *core.State, c core.Command) (string, error) {
 	ctx := context.Background()
 	currentTime := time.Now().UTC()
 	userName := c.Args[0]
+
+	if userName == "" {
+		return "", errors.New("please enter a name, name field cannot be empty.")
+	}
 
 	args := db.CreateUserParams{
 		ID:        uuid.New(),
@@ -59,7 +64,7 @@ func Login(s *core.State, c core.Command) (string, error) {
 
 	user, err := s.DB.GetUser(ctx, userName)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("user does not exist\n\nerr: %w", err)
 	}
 
 	if err := s.Cfg.SetUser(user.Name); err != nil {
