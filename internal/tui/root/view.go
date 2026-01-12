@@ -5,17 +5,50 @@ import (
 	"strings"
 
 	"github.com/ElitistNoob/gator/internal/tui/styles"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m model) View() string {
+	if !m.ready {
+		return ""
+	}
+
+	var body string
+
 	switch m.mode {
 	case cmdArguments:
-		return argumentView(m)
+		body = argumentView(m)
 	case cmdOutput:
-		return outputView(m)
+		body = fmt.Sprintf("%s\n\n%s\n%s", m.outputHeader(), outputView(m), m.outputFooter())
 	default:
-		return selectionView(m)
+		body = selectionView(m)
 	}
+
+	return body + "\n" + m.footer()
+}
+
+func (m model) outputHeader() string {
+	title := styles.TitleStyle.Render("Mr. Pager")
+	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
+	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
+}
+
+func (m model) outputFooter() string {
+	info := styles.InfoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
+	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info)))
+	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
+}
+
+func (m model) footer() string {
+	return styles.Footer.Render(
+		strings.Join([]string{
+			styles.FooterCmdStyle.Render("[↑↓]") + " scroll",
+			styles.FooterCmdStyle.Render("[j/k]") + " move",
+			styles.FooterCmdStyle.Render("[enter]") + " select/run",
+			styles.FooterCmdStyle.Render("[esc]") + " back",
+			styles.FooterCmdStyle.Render("[q]") + " quit",
+		}, " • "),
+	)
 }
 
 func selectionView(m model) string {
@@ -33,9 +66,6 @@ func selectionView(m model) string {
 		lines = append(lines, fmt.Sprintf("%s %s\t", styles.CursorStyle.Render(c), command.Name))
 	}
 	str.WriteString(styles.Content.Render(strings.Join(lines, "\n")))
-
-	footerText := fmt.Sprintf("Press %s to quit.", styles.FooterCmdStyle.Render("q"))
-	fmt.Fprintf(&str, "\n%s\n", styles.Footer.Render(footerText))
 
 	return str.String()
 }
@@ -57,47 +87,12 @@ func argumentView(m model) string {
 		fmt.Fprintf(&str, "\n%s", styles.Error.Render(m.errMsg.Error()))
 	}
 
-	var menu strings.Builder
-	options := make([]string, 0, len(footerOptions))
-	for _, c := range footerOptions {
-		options = append(options, fmt.Sprintf("%s %s", styles.FooterCmdStyle.Render(c.Input), c.Action))
-	}
-	menu.WriteString(strings.Join(options, " "))
-
-	fmt.Fprintf(&str, "\n%s\n", styles.Footer.Render(menu.String()))
 	return str.String()
 }
 
 func outputView(m model) string {
 	var str strings.Builder
-	fmt.Fprintf(&str, "%s\n", styles.Content.Render(string(m.output)))
-
-	footerText := fmt.Sprintf("Press %s to return to menu", styles.FooterCmdStyle.Render("esc"))
-	fmt.Fprintf(&str, "%s\n", styles.Footer.Render(footerText))
-
+	str.WriteString(m.viewport.View())
+	str.WriteString("\n")
 	return str.String()
-}
-
-type menuItem struct {
-	Input  string
-	Action string
-}
-
-var footerOptions = []menuItem{
-	{
-		Input:  "[tab]",
-		Action: "next",
-	},
-	{
-		Input:  "[esc]",
-		Action: "main menu",
-	},
-	{
-		Input:  "[enter]",
-		Action: "run",
-	},
-	{
-		Input:  "[ctrl+c]",
-		Action: "quit",
-	},
 }
