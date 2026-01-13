@@ -76,17 +76,18 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 	for i, post := range posts {
 		var postStr strings.Builder
 		postLines := make([]string, 0, len(posts))
-		postLines = append(postLines, styles.Header.Render(fmt.Sprintf("Blog %d\n", i+1)))
-		postLines = append(postLines, fmt.Sprintf(" - From: %s", post.FeedName))
-		postLines = append(postLines, fmt.Sprintf(" - Published On %s", post.PublishedAt.Format("Mon Jan 2")))
-		postLines = append(postLines, fmt.Sprintf(" - Title: %s", post.Title))
-		postLines = append(postLines, fmt.Sprintf(" - Description: %v", post.Description))
-		postLines = append(postLines, fmt.Sprintf(" - Url: %s", post.Url))
+		postLines = append(postLines, styles.Header.Render(fmt.Sprintf("Blog %d", i+1)))
+		postLines = append(postLines, fmt.Sprint())
+		postLines = append(postLines, fmt.Sprintf(" %s From: %s", styles.Highlight.Render("-"), post.FeedName))
+		postLines = append(postLines, fmt.Sprintf(" %s Published On %s", styles.Highlight.Render("-"), post.PublishedAt.Format("Mon Jan 2")))
+		postLines = append(postLines, fmt.Sprintf(" %s Title: %s", styles.Highlight.Render("-"), post.Title))
+		postLines = append(postLines, fmt.Sprintf(" %s Description: %v", styles.Highlight.Render("-"), post.Description))
+		postLines = append(postLines, fmt.Sprintf(" %s Url: %s", styles.Highlight.Render("-"), post.Url))
 
 		postStr.WriteString(strings.Join(postLines, "\n"))
 		postsLines = append(postsLines, styles.Result.Render(postStr.String()))
 	}
 
-	postsStr.WriteString(strings.Join(postsLines, "\n\n"))
+	postsStr.WriteString(strings.Join(postsLines, "\n"))
 	return postsStr.String(), nil
 }

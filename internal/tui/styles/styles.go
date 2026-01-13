@@ -55,9 +55,7 @@ var Result = lipgloss.NewStyle().
 	Width(Content.GetWidth()-6).
 	Padding(1, 2).
 	BorderStyle(lipgloss.RoundedBorder()).
-	BorderBackground(lipgloss.Color("#1b1b1b")).
-	BorderForeground((lipgloss.Color("#1b1b1b"))).
-	Background(lipgloss.Color("#1b1b1b"))
+	BorderForeground((lipgloss.Color("#3b3b3b")))
 
 var Input = lipgloss.NewStyle().
 	BorderBottom(true).
