@@ -10,7 +10,7 @@ import (
 func getTermSize() (width int, height int) {
 	w, h, err := term.GetSize(os.Stdin.Fd())
 
-	maxWidth := 70
+	maxWidth := 80
 	w = w - 2
 
 	if err != nil {
@@ -72,3 +72,17 @@ var FooterCmdStyle = lipgloss.NewStyle().
 
 var Highlight = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("10"))
+
+var TitleStyle = lipgloss.NewStyle().
+	BorderStyle(func() lipgloss.Border {
+		b := lipgloss.RoundedBorder()
+		b.Right = "├"
+		return b
+	}()).Padding(0, 1)
+
+var InfoStyle = lipgloss.NewStyle().
+	BorderStyle(func() lipgloss.Border {
+		b := lipgloss.RoundedBorder()
+		b.Left = "┤"
+		return b
+	}())

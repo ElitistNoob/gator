@@ -7,6 +7,7 @@ import (
 	"github.com/ElitistNoob/gator/internal/core"
 	"github.com/ElitistNoob/gator/internal/tui/styles"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -20,6 +21,10 @@ const (
 
 type model struct {
 	mode            Mode
+	viewport        viewport.Model
+	width           int
+	height          int
+	ready           bool
 	state           *core.State
 	cursor          int
 	commands        []core.Command
@@ -84,7 +89,12 @@ func InitialModel(s *core.State) model {
 				Run:  wrapCommand(app.MiddlewareLoggedIn(app.Following)),
 			},
 			{
-				Name: "Browse Posts",
+				Name: "Aggregate",
+				Args: []string{"Time Between Requests"},
+				Run:  wrapCommand(app.Agg),
+			},
+			{
+				Name: "Browse",
 				Args: []string{},
 				Run:  wrapCommand(app.MiddlewareLoggedIn(app.BrowsePosts)),
 			},

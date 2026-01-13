@@ -17,7 +17,11 @@ func Run() error {
 	defer state.SQLDB.Close()
 
 	model := root.InitialModel(state)
-	p := tea.NewProgram(model)
+	p := tea.NewProgram(model,
+		tea.WithAltScreen(),
+		tea.WithMouseCellMotion(),
+	)
+
 	if _, err := p.Run(); err != nil {
 		log.Fatalf("TUI, failed to run: %v", err)
 	}

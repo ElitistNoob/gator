@@ -9,6 +9,7 @@ import (
 
 	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
+	"github.com/ElitistNoob/gator/internal/tui/styles"
 	"github.com/google/uuid"
 )
 
@@ -54,16 +55,23 @@ func Following(s *core.State, c core.Command, user db.User) (string, error) {
 	}
 
 	var str strings.Builder
-	fmt.Fprintf(&str, "following feed:\n")
+	lines := make([]string, 0, len(feeds)+1)
+	fmt.Fprintf(&str, "following feed:\n\n")
 	for _, feed := range feeds {
-		fmt.Fprintf(&str, "> ID:   %v\n", feed.ID)
-		fmt.Fprintf(&str, "> CreateAt:   %v\n", feed.CreatedAt)
-		fmt.Fprintf(&str, "> UpdatedAt:   %v\n", feed.UpdatedAt)
-		fmt.Fprintf(&str, "> feed_name:   %v\n", feed.FeedName)
-		fmt.Fprintf(&str, "> user_name:   %v\n", feed.UserName)
-		fmt.Fprintf(&str, "> feed_url:    %v", feed.FeedUrl)
+		var f strings.Builder
+		fLines := make([]string, 0)
+		fLines = append(fLines, fmt.Sprintf("> ID:   %v", feed.ID))
+		fLines = append(fLines, fmt.Sprintf("> CreateAt:   %v", feed.CreatedAt))
+		fLines = append(fLines, fmt.Sprintf("> UpdatedAt:   %v", feed.UpdatedAt))
+		fLines = append(fLines, fmt.Sprintf("> feed_name:   %v", feed.FeedName))
+		fLines = append(fLines, fmt.Sprintf("> user_name:   %v", feed.UserName))
+		fLines = append(fLines, fmt.Sprintf("> feed_url:    %v", feed.FeedUrl))
+
+		f.WriteString(strings.Join(fLines, "\n"))
+		lines = append(lines, styles.Result.Render(f.String()))
 	}
 
+	str.WriteString(strings.Join(lines, "\n\n"))
 	return str.String(), nil
 }
 

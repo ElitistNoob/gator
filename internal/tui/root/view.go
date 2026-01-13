@@ -10,7 +10,7 @@ import (
 
 func (m model) View() string {
 	if !m.ready {
-		return ""
+		return "\n Initializing..."
 	}
 
 	var body string
@@ -19,7 +19,7 @@ func (m model) View() string {
 	case cmdArguments:
 		body = argumentView(m)
 	case cmdOutput:
-		body = fmt.Sprintf("%s\n\n%s\n%s", m.outputHeader(), outputView(m), m.outputFooter())
+		body = fmt.Sprintf("%s\n\n%s\n%s", m.outputHeader(), m.viewport.View(), m.outputFooter())
 	default:
 		body = selectionView(m)
 	}
@@ -28,7 +28,7 @@ func (m model) View() string {
 }
 
 func (m model) outputHeader() string {
-	title := styles.TitleStyle.Render("Mr. Pager")
+	title := styles.TitleStyle.Render(m.selectedCommand.Name)
 	line := strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
@@ -87,12 +87,5 @@ func argumentView(m model) string {
 		fmt.Fprintf(&str, "\n%s", styles.Error.Render(m.errMsg.Error()))
 	}
 
-	return str.String()
-}
-
-func outputView(m model) string {
-	var str strings.Builder
-	str.WriteString(m.viewport.View())
-	str.WriteString("\n")
 	return str.String()
 }

@@ -20,7 +20,7 @@ func AddFeed(s *core.State, c core.Command, user db.User) (string, error) {
 	ctx := context.Background()
 	name, url := c.Args[0], c.Args[1]
 	if c.Args[0] == "" || c.Args[1] == "" {
-		return "", fmt.Errorf("Name and Url values cannot be empty")
+		return "", fmt.Errorf("name and Url values cannot be empty")
 	}
 	args := db.CreateFeedParams{
 		ID:        uuid.New(),

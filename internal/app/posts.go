@@ -10,6 +10,7 @@ import (
 	"github.com/ElitistNoob/gator/internal/core"
 	db "github.com/ElitistNoob/gator/internal/database"
 	"github.com/ElitistNoob/gator/internal/timeutils"
+	"github.com/ElitistNoob/gator/internal/tui/styles"
 )
 
 func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
@@ -69,16 +70,23 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 		return "", fmt.Errorf("couldn't get posts for user: %w", err)
 	}
 
-	var str strings.Builder
-	fmt.Fprintf(&str, "Found %d posts for user %s\n", len(posts), user.Name)
+	var postsStr strings.Builder
+	postsLines := make([]string, 0, len(posts)+1)
+	postsLines = append(postsLines, fmt.Sprintf("Found %d posts for user %s", len(posts), user.Name))
 	for i, post := range posts {
-		fmt.Fprintf(&str, "> Blog %d:\n", i+1)
-		fmt.Fprintf(&str, " - From: %s\n", post.FeedName)
-		fmt.Fprintf(&str, " - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
-		fmt.Fprintf(&str, " - Title: %s\n", post.Title)
-		fmt.Fprintf(&str, " - Description: %s\n", post.Description.String)
-		fmt.Fprintf(&str, " - Url: %s", post.Url)
+		var postStr strings.Builder
+		postLines := make([]string, 0, len(posts))
+		postLines = append(postLines, styles.Header.Render(fmt.Sprintf("Blog %d\n", i+1)))
+		postLines = append(postLines, fmt.Sprintf(" - From: %s", post.FeedName))
+		postLines = append(postLines, fmt.Sprintf(" - Published On %s", post.PublishedAt.Format("Mon Jan 2")))
+		postLines = append(postLines, fmt.Sprintf(" - Title: %s", post.Title))
+		postLines = append(postLines, fmt.Sprintf(" - Description: %v", post.Description))
+		postLines = append(postLines, fmt.Sprintf(" - Url: %s", post.Url))
+
+		postStr.WriteString(strings.Join(postLines, "\n"))
+		postsLines = append(postsLines, styles.Result.Render(postStr.String()))
 	}
 
-	return str.String(), nil
+	postsStr.WriteString(strings.Join(postsLines, "\n\n"))
+	return postsStr.String(), nil
 }
