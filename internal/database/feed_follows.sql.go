@@ -86,7 +86,8 @@ const getFeedFollowsForUser = `-- name: GetFeedFollowsForUser :many
 SELECT 
   ff.id, ff.created_at, ff.updated_at, ff.user_id, ff.feed_id,
   users.name AS user_name,
-  feeds.name AS feed_name
+  feeds.name AS feed_name,
+  feeds.url AS feed_url
 FROM feed_follows AS ff
 INNER JOIN users ON ff.user_id = users.id
 INNER JOIN feeds ON ff.feed_id = feeds.id
@@ -101,6 +102,7 @@ type GetFeedFollowsForUserRow struct {
 	FeedID    uuid.UUID
 	UserName  string
 	FeedName  string
+	FeedUrl   string
 }
 
 func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.UUID) ([]GetFeedFollowsForUserRow, error) {
@@ -120,6 +122,7 @@ func (q *Queries) GetFeedFollowsForUser(ctx context.Context, userID uuid.UUID) (
 			&i.FeedID,
 			&i.UserName,
 			&i.FeedName,
+			&i.FeedUrl,
 		); err != nil {
 			return nil, err
 		}

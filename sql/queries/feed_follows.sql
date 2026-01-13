@@ -17,7 +17,8 @@ INNER JOIN feeds ON inserted_feed_follow.feed_id = feeds.id;
 SELECT 
   ff.*,
   users.name AS user_name,
-  feeds.name AS feed_name
+  feeds.name AS feed_name,
+  feeds.url AS feed_url
 FROM feed_follows AS ff
 INNER JOIN users ON ff.user_id = users.id
 INNER JOIN feeds ON ff.feed_id = feeds.id

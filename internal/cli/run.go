@@ -1,38 +1,23 @@
 package cli
 
 import (
-	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/ElitistNoob/gator/internal/app"
-	"github.com/ElitistNoob/gator/internal/config"
 	"github.com/ElitistNoob/gator/internal/core"
-	"github.com/ElitistNoob/gator/internal/database"
-	_ "github.com/lib/pq"
 )
 
-func Run(args []string) error {
+func Run(args []string) (string, error) {
 	if len(args) < 2 {
 		log.Fatalln("not enough arguments were provided")
 	}
 
-	cfg, err := config.Read()
+	state, err := app.Initialize(core.ModeCLI)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("failed to initialize app: %s", err)
 	}
-
-	db, err := sql.Open("postgres", cfg.Db_url)
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
-	defer db.Close()
-
-	dbQueries := database.New(db)
-
-	state := &core.State{
-		DB:  dbQueries,
-		Cfg: cfg,
-	}
+	defer state.SQLDB.Close()
 
 	c := NewCommand()
 
@@ -53,5 +38,14 @@ func Run(args []string) error {
 	// Posts commands
 	c.register("browse", app.MiddlewareLoggedIn(app.BrowsePosts))
 
-	return c.Run(state, core.Command{Name: args[1], Args: args[2:]})
+	out, err := c.Run(state, core.Command{Name: args[1], Args: args[2:]})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if state.Mode == core.ModeCLI {
+		fmt.Print(out)
+	}
+
+	return out, err
 }

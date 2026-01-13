@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ElitistNoob/gator/internal/core"
@@ -11,15 +12,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func FollowFeed(s *core.State, c core.Command, user db.User) error {
+func FollowFeed(s *core.State, c core.Command, user db.User) (string, error) {
 	if len(c.Args) < 1 {
-		return errors.New("no argument passed\nexpected: <url>")
+		return "", errors.New("no argument passed\nexpected: <url>")
 	}
 
 	ctx, url := context.Background(), c.Args[0]
 	feed, err := s.DB.GetFeedByUrl(ctx, url)
 	if err != nil {
-		return fmt.Errorf("couldn't get feed with url: %v\nerr: %w", url, err)
+		return "", fmt.Errorf("couldn't get feed with url: %v\nerr: %w", url, err)
 	}
 
 	now := time.Now().UTC()
@@ -32,46 +33,49 @@ func FollowFeed(s *core.State, c core.Command, user db.User) error {
 	}
 	d, err := s.DB.CreateFeedFollow(ctx, args)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("feed followed successfully:\n")
+	var str strings.Builder
+	fmt.Fprintf(&str, "feed followed successfully:\n")
 
-	fmt.Printf("> feed_name:   %v\n", d.FeedName)
-	fmt.Printf("> user_name:   %v\n", d.UserName)
+	fmt.Fprintf(&str, "> feed_name:   %v\n", d.FeedName)
+	fmt.Fprintf(&str, "> user_name:   %v", d.UserName)
 
-	return nil
+	return str.String(), nil
 }
 
-func Following(s *core.State, c core.Command, user db.User) error {
+func Following(s *core.State, c core.Command, user db.User) (string, error) {
 	ctx := context.Background()
 
 	feeds, err := s.DB.GetFeedFollowsForUser(ctx, user.ID)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Printf("following feed:\n")
+	var str strings.Builder
+	fmt.Fprintf(&str, "following feed:\n")
 	for _, feed := range feeds {
-		fmt.Printf("> ID:   %v\n", feed.ID)
-		fmt.Printf("> CreateAt:   %v\n", feed.CreatedAt)
-		fmt.Printf("> UpdatedAt:   %v\n", feed.UpdatedAt)
-		fmt.Printf("> feed_name:   %v\n", feed.FeedName)
-		fmt.Printf("> user_name:   %v\n", feed.UserName)
+		fmt.Fprintf(&str, "> ID:   %v\n", feed.ID)
+		fmt.Fprintf(&str, "> CreateAt:   %v\n", feed.CreatedAt)
+		fmt.Fprintf(&str, "> UpdatedAt:   %v\n", feed.UpdatedAt)
+		fmt.Fprintf(&str, "> feed_name:   %v\n", feed.FeedName)
+		fmt.Fprintf(&str, "> user_name:   %v\n", feed.UserName)
+		fmt.Fprintf(&str, "> feed_url:    %v", feed.FeedUrl)
 	}
 
-	return nil
+	return str.String(), nil
 }
 
-func Unfollow(s *core.State, c core.Command, user db.User) error {
+func Unfollow(s *core.State, c core.Command, user db.User) (string, error) {
 	if len(c.Args) != 1 {
-		return fmt.Errorf("expected: %s <feed_url>\ngot: %s <null>", c.Name, c.Name)
+		return "", fmt.Errorf("expected: %s <feed_url>\ngot: %s <null>", c.Name, c.Name)
 	}
 
 	ctx := context.Background()
 	feed, err := s.DB.GetFeedByUrl(ctx, c.Args[0])
 	if err != nil {
-		return fmt.Errorf("couldn't get feed:\n err: %w", err)
+		return "", fmt.Errorf("couldn't get feed:\n err: %w", err)
 	}
 
 	args := db.DeleteFeedFollowParams{
@@ -80,9 +84,9 @@ func Unfollow(s *core.State, c core.Command, user db.User) error {
 	}
 
 	if err := s.DB.DeleteFeedFollow(context.Background(), args); err != nil {
-		return fmt.Errorf("couldn't delete follow record: %w", err)
+		return "", fmt.Errorf("couldn't delete follow record: %w", err)
 	}
 
-	fmt.Printf("%s unfollowed successfully", feed.Name)
-	return nil
+	str := fmt.Sprintf("%s unfollowed successfully", feed.Name)
+	return str, nil
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/ElitistNoob/gator/internal/timeutils"
 )
 
-func BrowsePosts(s *core.State, c core.Command, user db.User) error {
+func BrowsePosts(s *core.State, c core.Command, user db.User) (string, error) {
 	now := time.Now()
 	today := time.Date(
 		now.Year(), now.Month(), now.Day(),
@@ -29,23 +29,23 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 	f.StringVar(&toStr, "to", today, "end date (exclusive), format: YYYY-MM-DD")
 	f.StringVar(&order, "order", "desc", "order of post to show by created at")
 	if err := f.Parse(c.Args); err != nil {
-		return err
+		return "", err
 	}
 
 	if limit <= 0 {
-		return fmt.Errorf("limit must be greater than 0")
+		return "", fmt.Errorf("limit must be greater than 0")
 	}
 
 	order = strings.ToLower(order)
 	if order != "asc" && order != "desc" {
-		return fmt.Errorf("order must be 'asc' or 'desc'")
+		return "", fmt.Errorf("order must be 'asc' or 'desc'")
 	}
 
 	var fromDate time.Time
 	if fromStr != "" {
 		t, err := timeutils.ParseTime(fromStr)
 		if err != nil {
-			return fmt.Errorf("wrong date format: %w", err)
+			return "", fmt.Errorf("wrong date format: %w", err)
 		}
 
 		fromDate = t
@@ -53,7 +53,7 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 
 	toDate, err := timeutils.ParseTime(toStr)
 	if err != nil {
-		return fmt.Errorf("wrong date format: %w", err)
+		return "", fmt.Errorf("wrong date format: %w", err)
 	}
 
 	ctx := context.Background()
@@ -66,22 +66,19 @@ func BrowsePosts(s *core.State, c core.Command, user db.User) error {
 			Limit:         int32(limit),
 		})
 	if err != nil {
-		return fmt.Errorf("couldn't get posts for user: %w", err)
+		return "", fmt.Errorf("couldn't get posts for user: %w", err)
 	}
 
-	fmt.Printf("Found %d posts for user %s\n", len(posts), user.Name)
+	var str strings.Builder
+	fmt.Fprintf(&str, "Found %d posts for user %s\n", len(posts), user.Name)
 	for i, post := range posts {
-		fmt.Println()
-		fmt.Printf("> Blog %d:\n", i+1)
-		fmt.Printf(" - From: %s\n", post.FeedName)
-		fmt.Printf(" - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
-		fmt.Printf(" - Title: %s\n", post.Title)
-		fmt.Printf(" - Description: %s\n", post.Description.String)
-		fmt.Printf(" - Url: %s\n", post.Url)
-		fmt.Println()
-		fmt.Println("=============================================")
-		fmt.Println()
+		fmt.Fprintf(&str, "> Blog %d:\n", i+1)
+		fmt.Fprintf(&str, " - From: %s\n", post.FeedName)
+		fmt.Fprintf(&str, " - Published on: %s\n", post.PublishedAt.Format("Mon Jan 2"))
+		fmt.Fprintf(&str, " - Title: %s\n", post.Title)
+		fmt.Fprintf(&str, " - Description: %s\n", post.Description.String)
+		fmt.Fprintf(&str, " - Url: %s", post.Url)
 	}
 
-	return nil
+	return str.String(), nil
 }
